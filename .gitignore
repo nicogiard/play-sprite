@@ -5,7 +5,9 @@
 .settings
 .svn
 db/
+dist/
 eclipse/
 logs/
+lib/
 tmp/
 
