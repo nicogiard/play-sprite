@@ -1,0 +1,38 @@
+play-sprite project
+
+@author nicogiard@gmail.com
+
+###########################
+
+play-sprite est un plugin pour le framework Play!
+
+play-sprite se propose, une fois activé, de générer pour vous un fichier PNG regroupant toutes vos images déclarées comme 'background' dans votre CSS ainsi qu'un fichier CSS surchargant les indications de background-image et backgroud-position.
+
+###########################
+
+Marche à suivre.
+
+(Si un jour ce plugin est dans le répositiory)
+> play install play-sprite
+
+(Sinon, le récupérer depuis github)
+> git clone xxx play-sprite
+
+Dans le fichier application.conf de votre projet ajouter le module play-sprite
+
+module.sprite=${play.path}/modules/play-sprite 
+
+
+Ajouter dans votre fichier "Template" sous la ligne :
+
+#{get 'moreStyles' /}
+
+la ligne suivante :
+
+#{sprite /}
+
+(ce tag ajoute à votre page le fichier css généré par le plugin)
+
+Et voilà, au prochain démarrage de votre application, le plugin générera automatiquement les fichiers nécessaires.
+
+Pour tout problème ou toute remarque, n'hésitez pas à m'envoyer un email.
