@@ -44,11 +44,14 @@ import play.jobs.OnApplicationStart;
 import play.vfs.VirtualFile;
 
 /**
- * SpriteBootstrap permet de générer un fichier Sprite avec vos images de background et de générer la css associée.
+ * SpriteBootstrap permet de générer un fichier Sprite avec vos images de
+ * background et de générer la css associée.
  * 
- * TODO ajouter la possibilité de parametrer quel fichier css est scanné
- * TODO ajouter la possibilité de le faire sur plusieurs css
- * TODO parametrer les noms des fichiers .png et .css générés
+ * application.conf: <br/>
+ * sprite.mainCssFile=/public/stylesheets/main.css
+ * sprite.generatedImageFile=/public/images/play-sprite.png
+ * 
+ * TODO ajouter la possibilité de scanner plusieures css 
  * 
  * @author nicogiard
  */
@@ -59,7 +62,7 @@ public class SpriteBootstrap extends Job {
 		Logger.info("Lancement du SpriteBootstrap");
 
 		try {
-			File mainCssFile = new File(Play.applicationPath.getAbsolutePath() + "/public/stylesheets/main.css");
+			File mainCssFile = new File(Play.applicationPath.getAbsolutePath() + Play.configuration.getProperty("sprite.mainCssFile", "/public/stylesheets/main.css"));
 
 			Stylesheet style = new CssParser().parse(new FileReader(mainCssFile));
 
@@ -101,8 +104,11 @@ public class SpriteBootstrap extends Job {
 
 			// Lancement de la création du fichier css sprite
 			buildCss(spriteImages, cssDestination);
+			
+			Logger.info("Fin de SpriteBootstrap");
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Logger.error("Une erreur est survenue : '%s'", e.getMessage());
+			Logger.info("Aucune action de SpriteBootstrap");
 		}
 	}
 
@@ -197,7 +203,8 @@ public class SpriteBootstrap extends Job {
 				boolean right = false;
 				for (CssRule rule : img.block.getRules()) {
 					if (rule.name.contains("background")) {
-						// TODO faire mieux qu'un contains de right (plutot une regex)
+						// TODO faire mieux qu'un contains de right (plutot une
+						// regex)
 						right = StringUtils.contains(rule.value, "right");
 					}
 				}
@@ -213,12 +220,12 @@ public class SpriteBootstrap extends Job {
 					sb.append("-");
 				sb.append(img.spriteY).append("px; ");
 				sb.append("}");
-				
+
 				sbEach.append(sb.toString()).append('\n');
 				Logger.debug(sb.toString());
 			}
 
-			sbBackground = new StringBuilder(sbBackground.substring(0, sbBackground.length() - 2)).append(" { background: white url(/public/images/play-sprite.png) no-repeat left top;}");
+			sbBackground = new StringBuilder(sbBackground.substring(0, sbBackground.length() - 2)).append(" { background: white url(").append(Play.configuration.getProperty("sprite.generatedImageFile", "/public/images/play-sprite.png")).append(") no-repeat left top;}");
 			out.println(sbBackground.toString());
 			Logger.debug(sbBackground.toString());
 			out.println(sbEach.toString());
@@ -251,12 +258,8 @@ public class SpriteBootstrap extends Job {
 	 * @return Le fichier image destination pour le Sprite
 	 */
 	public static File initImageDestination() {
-		// Le répertoire source des images de background
-		File imageBackgroundPath = new File(Play.applicationPath.getAbsolutePath() + "/public/images");
-		Logger.debug("Chemin vers les images de background : '%s'", imageBackgroundPath.getAbsolutePath());
-
 		// Le fichier image de destination pour les sprites
-		File imageDestination = new File(imageBackgroundPath.getAbsolutePath() + "/play-sprite.png");
+		File imageDestination = new File(Play.applicationPath.getAbsolutePath() + Play.configuration.getProperty("sprite.generatedImageFile", "/public/images/play-sprite.png"));
 
 		// Si le fichier image de destination existe on le supprime
 		if (imageDestination.exists()) {
@@ -304,7 +307,8 @@ public class SpriteBootstrap extends Job {
 	 * @return la chaine correspondante
 	 */
 	public static String buildSelectorString(Selector selector) {
-		// TODO a voir, j'ai eu un probleme avec un Selector '.pagination .previous'.
+		// TODO a voir, j'ai eu un probleme avec un Selector '.pagination
+		// .previous'.
 		StringBuilder sb = new StringBuilder();
 		if (selector instanceof AnySelector) {
 			sb.append("*");
